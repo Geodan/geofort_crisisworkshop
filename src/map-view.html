@@ -31,10 +31,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
 
       }
-      paper-fab {
+      #togglelayers {
           background: grey;
           position: absolute;
           bottom: 10px;
+          right: 10px;
+      }
+      #togglechat {
+          background: grey;
+          position: absolute;
+          bottom: 60px;
           right: 10px;
       }
       #mapelement {
@@ -70,7 +76,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </style>
     <paper-toast id="toast" text="{{toasttext}}"></paper-toast>
-    <paper-drawer-panel name='main' id='mainpanel' right-drawer disable-swipe drawerWidth="300" drawerToggleAttribute='paper-drawer-toggle1'>
+    <paper-drawer-panel name='main' id='mainpanel' right-drawer>
         <div drawer>
             <chat-view id="eaglechat"
                 chatitems="[[chatitems]]"
@@ -94,7 +100,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 ></mappu-drawbuttons>
                 <div id='togglebuttons'>
                     <paper-fab mini id='togglelayers' toggles icon="menu" active='{{layerstoggled}}'></paper-fab>
-                    <!--<paper-fab mini id='togglechat' toggles icon="send" active='{{chattoggled}}' paper-drawer-toggle1></paper-fab>-->
+                    <paper-fab mini id='togglechat' toggles icon="send" paper-drawer-toggle></paper-fab>
                 </div>
                 <mappu-stylesets styleset1="{{styleset}}"></mappu-stylesets>
                 <mappu-cowlayer

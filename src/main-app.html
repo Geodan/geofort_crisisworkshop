@@ -11,20 +11,21 @@ Copyright (c) 2016 Geodan
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/cow-elements/cow-core.html">
 <link rel="import" href="../bower_components/cow-elements/cow-connector.html">
 
 <script src="../geofort_config.js"></script>
-<script src="../bower_components/d3.mappu/dist/d3.mappu.js"></script>
-<link rel="import" href="my-icons.html">
 
 <dom-module id="main-app">
 
   <template>
-
+      <style include="iron-flex iron-flex-alignment"></style>
     <style>
 
       :host {
@@ -32,7 +33,10 @@ Copyright (c) 2016 Geodan
         --app-primary-color: #4285f4;
         --app-secondary-color: black;
       }
-
+      app-toolbar {
+          background-color: var(--app-primary-color);
+          color: #fff;
+      }
       app-header {
         background-color: var(--app-primary-color);
         color: #fff;
@@ -85,12 +89,20 @@ Copyright (c) 2016 Geodan
 		itemstore="{{itemstore}}"
 		startlocation="{{startlocation}}"
 		></cow-connector>
-
+      <paper-dialog id='infodialog' opened="{{infodialog}}">
+          <h2>Informatie</h2>
+          <paper-dialog-scrollable>
+              Hier komt de informatieve tekst die hoort bij het scenario
+          </paper-dialog-scrollable>
+          <div class="buttons">
+              <paper-button dialog-confirm>OK</paper-button>
+          </div>
+      </paper-dialog>
     <app-drawer-layout fullbleed>
 
       <!-- Drawer content -->
       <app-drawer>
-        <app-toolbar>Eagle</app-toolbar>
+        <app-toolbar><img src="../images/icon-eagle.png"></app-toolbar>
 
         <iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="teams" href="/teams">Team</a>
@@ -107,9 +119,13 @@ Copyright (c) 2016 Geodan
       <app-header-layout has-scrolling-region>
 
         <app-header fixed>
-          <app-toolbar>
-            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div title>Geofort crisisworkshop </div><div>Team: [[activeuser._id]] - Project: [[_getProjectName(selectedproject)]]</div>
+          <app-toolbar class="layout horizontal">
+
+                <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
+                <div class="flex">[[_getProjectName(selectedproject)]]</div>
+                <div>[[activeuser._id]]</div>
+                <paper-icon-button icon='info' toggles active='{{infodialog}}'></paper-icon-button>
+
           </app-toolbar>
         </app-header>
 
@@ -160,6 +176,73 @@ Copyright (c) 2016 Geodan
       ready: function(){
           this.cowconfig = config.cowconfig;
          this.teams = config.teams;
+
+        this.addEventListener('newincident',function(e){
+          var name = e.detail.msg.name;
+          var project = this.core.projects({});
+          var center = e.detail.msg.center;
+          var zoom = e.detail.msg.zoom;
+          project.data('name', name)
+                  .data('status','Actief')
+                  .data('type', 'Geofort')
+                  .data('location',{lat: center[1], lon: center[0], zoomlevel: zoom})
+                  //.data('location',{lat: 51.881892, lon: 5.110007, zoomlevel: 20})
+                  .data('teams',[
+                    {id: 1, name: 'Incident', boxes: [
+                      {id: 1, type: 'text', name: 'Meldingen'}
+                    ]},
+                    {id: 2, name: 'Team Populatie', boxes: [
+                      {id: 2, type: 'text', name: 'Opdracht'},
+                      {id: 1, type: 'text', name: 'Samenvatting'}
+                    ]},
+                    {id: 3, name: 'Team Evacuatie', boxes: [
+                      {id: 2, type: 'text', name: 'Opdracht'},
+                      {id: 1, type: 'text', name: 'Samenvatting'}
+                    ]},
+                    {id: 4, name: 'Team Opvang', boxes: [
+                      {id: 2, type: 'text', name: 'Opdracht'},
+                      {id: 1, type: 'text', name: 'Samenvatting'}
+                    ]},
+                    {id: 5, name: 'Team Communicatie', boxes: [
+                      {id: 2, type: 'text', name: 'Opdracht'},
+                      {id: 1, type: 'text', name: 'Samenvatting'}
+                    ]}
+                  ]).sync();
+
+          var populatietext = ""
+                  + "U moet zien uit te vinden waar en hoeveel bewoners in het gebied zijn.<br>"
+                  + "Let daarbij extra op kwetsbare groepen zoals kinderopvang en zorglocaties en gebruik daarvoor google maps.<br>"
+                  + "Voeg in ieder geval de volgende locaties toe:<br>"
+                  + "   - Kinderdagverblijf de Asperantjes, 20 kinderen<br>"
+                  + "   - Basisschool De Open Poort, 250 kinderen.<br>"
+                  + "Eventuele zorglocaties in kaart brengen, zoals beschermd wonen en senioren.";
+
+          var evacuatietext = ""
+                  + "U moet de beste evacuatieroutes vinden en intekenen met behulp van de hoogtekaart.<br>"
+                  + "Daarnaast bent u verantwoordelijk voor de wegafzetting rond het gebied.<br><br>"
+                  + "Bedenk wat er verder nodig is bij een evacuatie en zet dit in de kaart.";
+
+          var opvangtext = ""
+                  + "U moet de locaties zoeken waar de evacuees kunnen worden opgevangen. Gebruik hiervoor google maps en zoek naar sporthallen. Voeg in ieder geval de volgende locaties toe:<br>"
+                  + "- Verzorgingstehuis Ter Leede, opvangcapaciteit 50 bedden<br>"
+                  + "- Beatrix ziekenhuis, opvang speciale zorg 20, normaal 80 bed.<br>"
+                  + "- Verzorgingstehuis Lingehof, noodcapaciteit 25 bedden. <br>"
+                  + "- Sporthal Terweijde, maximaal 500 personen. <br>"
+                  + "- Sporthal De Smidseberg, maximaal 1500 personen<br>";
+
+          var communicatietext = ""
+                  + "U moet zorgen dat alle teams voldoende informatie verzamelen voor een correcte evacuatie."
+                  + "Schrijf een persbericht voor de burgemeester zodat de bevolking en de pers ingelicht kan worden over de juiste stand van zaken en de procedure van de evacuatie.";
+
+
+          var timestamp = new Date().getTime();
+          //project.items({_id:timestamp + 't0'}).data({type: "text", team: 1, box: 1, text: incidenttext}).sync();
+          project.items({_id:timestamp + 't1'}).data({type: "text", team: 2, box: 2, text: populatietext}).sync();
+          project.items({_id:timestamp + 't2'}).data({type: "text", team: 3, box: 2, text: evacuatietext}).sync();
+          project.items({_id:timestamp + 't3'}).data({type: "text", team: 4, box: 2, text: opvangtext}).sync();
+          project.items({_id:timestamp + 't4'}).data({type: "text", team: 5, box: 2, text: communicatietext}).sync();
+
+        });
      },
       _routePageChanged: function(page) {
         this.page = page || 'teams';

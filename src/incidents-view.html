@@ -1,0 +1,106 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-item/paper-item-body.html">
+
+<dom-module id="incidents-view">
+
+  <!-- Defines the element's style and local DOM -->
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 16px;
+      }
+      .item {
+          margin-left: 20px;
+      	 cursor: pointer;
+          max-width: 400px;
+          margin-right: 20px;
+      }
+      #addbutton {
+          background: orange;
+          position: fixed;
+          z-index: 10;
+          bottom:20px;
+          right: 20px;
+      }
+      .close{
+          color: grey;
+      }
+      .list {
+          position: absolute;
+          height: 92%;
+          overflow: auto;
+      }
+    </style>
+    <div class='list'>
+        <h2>Incidenten</h2>
+     <iron-selector attr-for-selected="id" selected="{{selectedproject}}">
+     	<template is="dom-repeat" items="[[projects]]" sort="datesort">
+            <paper-material id="[[item._id]]" class='item'>
+     		<paper-icon-item>
+                <div class="avatar" item-icon></div>
+    			<paper-item-body two-line>
+    				<div>[[item._data.name]]</div>
+    				<div secondary>[[updated(item)]]</div>
+    			</paper-item-body>
+                <paper-icon-button class='close' icon="close" alt="Sluit incident" on-click='remove'>
+                </paper-icon-button>
+    		</paper-icon-item>
+        </paper-material>
+    	</template>
+     </iron-selector>
+    </div>
+  </template>
+
+  <!-- Creates the element's prototype and registers it -->
+  <script>
+    Polymer({
+      is: 'incidents-view',
+      properties: {
+        route: Object,
+        projects: Array,
+            selectedproject: {
+                type: String,
+                notify: true
+            }
+        },
+        updated: function(d){
+            var displayDate;
+            var date = new Date(parseInt(d.updated()));
+            var now = new Date();
+            var todayAtMidn = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            if (date < todayAtMidn) {
+                displayDate = date.toLocaleDateString();
+            } else {
+                displayDate = date.toLocaleTimeString();
+            }
+
+    		var creator = d.creator()?d.creator().data('name'):'unknown';
+    		return displayDate + ' (by: ' + creator + ')';
+    	},
+        datesort: function(a,b){
+            return b.updated() - a.updated();
+        },
+    	add: function(){
+    		this.$.adddialog.open();
+    		this.$.addincident.activate();//TODO
+    	},
+    	remove: function(e){
+    		e.stopPropagation();
+    		var r = confirm("You are going to remove this incident from the list!");
+    		if (r == true) {
+    			e.model.item.deleted(true).sync();
+    		} else {
+    			// do nothing
+    		}
+
+    	}
+
+    });
+  </script>
+
+</dom-module>

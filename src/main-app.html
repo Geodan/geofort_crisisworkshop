@@ -13,12 +13,18 @@ Copyright (c) 2016 Geodan
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/cow-elements/cow-core.html">
 <link rel="import" href="../bower_components/cow-elements/cow-connector.html">
+<link rel="import" href="../bower_components/cow-elements/cow-status.html">
+<link rel="import" href="teams-view.html">
+<link rel="import" href="incidents-view.html">
+<link rel="import" href="map-view.html">
+<link rel="import" href="scenario-manager.html">
 
 <script src="../geofort_config.js"></script>
 
@@ -62,6 +68,10 @@ Copyright (c) 2016 Geodan
       .drawer-list a.subroute {
         padding-left: 32px;
       }
+      
+      paper-item {
+      	  cursor: pointer;
+      }
 
 
     </style>
@@ -89,6 +99,12 @@ Copyright (c) 2016 Geodan
 		itemstore="{{itemstore}}"
 		startlocation="{{startlocation}}"
 		></cow-connector>
+		
+	  <scenario-manager
+	  	scenario="[[selectedscenario]]"
+	  	map="[[map]]"
+	  
+	  ></scenario-manager>
       <paper-dialog id='infodialog' opened="{{infodialog}}">
           <h2>Informatie</h2>
           <paper-dialog-scrollable>
@@ -105,12 +121,21 @@ Copyright (c) 2016 Geodan
         <app-toolbar><img src="../images/icon-eagle.png"></app-toolbar>
 
         <iron-selector selected="{{page}}" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="teams" href="/teams">Team</a>
+        <!-- DISABLED ROUTING 
+          <a name="teams" href="./teams">Team</a>
           <template is="dom-if" if="[[account]]">
-              <a name="incidents" href="/incidents">Incident</a>
+              <a name="incidents" href="./incidents">Incident</a>
           </template>
           <template is="dom-if" if="[[curproject]]">
-              <a name="map" href="/map">Kaart</a>
+              <a name="map" href="./map">Kaart</a>
+          </template>
+          -->
+          <paper-item name='teams'>Team</paper-item>
+          <template is="dom-if" if="[[account]]">
+              <paper-item name='incidents'>Incident</paper-item>
+          </template>
+          <template is="dom-if" if="[[curproject]]">
+              <paper-item name='map'>Kaart</paper-item>
           </template>
         </iron-selector>
       </app-drawer>
@@ -125,7 +150,8 @@ Copyright (c) 2016 Geodan
                 <div class="flex">[[_getProjectName(selectedproject)]]</div>
                 <div>[[activeuser._id]]</div>
                 <paper-icon-button icon='info' toggles active='{{infodialog}}'></paper-icon-button>
-
+                <cow-status core="[[core]]" connected="{{cowconnected}}"></cow-status>
+                <template is="dom-if" if="[[!cowconnected]]">COW!</template>
           </app-toolbar>
         </app-header>
 
@@ -136,7 +162,10 @@ Copyright (c) 2016 Geodan
             itemstore=[[itemstore]]
             featureitems=[[featureitems]]
             chatitems=[[chatitems]]
-            activeuser=[[activeuser]]></map-view>
+            activeuser=[[activeuser]]
+            startlocation=[[startlocation]]
+            map={{map}}
+            ></map-view>
         </iron-pages>
 
       </app-header-layout>
@@ -167,6 +196,9 @@ Copyright (c) 2016 Geodan
         },
         selectedproject: {
             observer: '_projectChanged'
+        },
+        selectedscenario: {
+        	type: String
         }
       },
 
@@ -182,10 +214,12 @@ Copyright (c) 2016 Geodan
           var project = this.core.projects({});
           var center = e.detail.msg.center;
           var zoom = e.detail.msg.zoom;
+          var scenario = e.detail.msg.scenario; 
           project.data('name', name)
                   .data('status','Actief')
                   .data('type', 'Geofort')
-                  .data('location',{lat: center[1], lon: center[0], zoomlevel: zoom})
+                  .data('scenario', scenario)
+                  .data('location',{lat: center[1], lng: center[0], zoomlevel: zoom})
                   //.data('location',{lat: 51.881892, lon: 5.110007, zoomlevel: 20})
                   .data('teams',[
                     {id: 1, name: 'Incident', boxes: [
@@ -250,8 +284,9 @@ Copyright (c) 2016 Geodan
 
       _pageChanged: function(page) {
         // load page import on demand.
-        this.importHref(
-          this.resolveUrl(page + '-view.html'), null, null, true);
+        //TT: lazy loading turned off
+        //this.importHref(
+        //  this.resolveUrl(page + '-view.html'), null, null, true);
       },
       _teamChanged: function(team){
       	//Spoofin an account for cow-connector
@@ -267,6 +302,7 @@ Copyright (c) 2016 Geodan
       },
       _projectChanged: function(){
          this.page = 'map';
+         this.selectedscenario = this.core.project().data('scenario');
      },
      _getProjectName: function(id){
         return this.core.projects(id.toString()).data('name');

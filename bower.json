@@ -9,10 +9,9 @@
     "iron-elements": "PolymerElements/iron-elements#^1",
     "paper-elements": "PolymerElements/paper-elements#^1",
     "polymer": "polymer/polymer#^1",
-    "cow-elements": "GeodanElements/cow-elements",
-    "mappu-elements": "GeodanElements/mappu-elements",
-    "d3.mappu": "Geodan/d3.mappu",
-    "gm-elements": "GeodanElements/gm-elements#"
+    "cow-elements": "GeodanElements/cow-elements#master",
+    "mappu-elements": "GeodanElements/mappu-elements#master",
+    "gm-elements": "https://github.com/GeodanElements/gm-elements.git#master"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

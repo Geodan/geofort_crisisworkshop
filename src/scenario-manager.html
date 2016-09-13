@@ -72,7 +72,7 @@
         addLeerdamdata: function(){
         	var self= this;
         	var counter = 0;
-        	d3.json('./data/flooddata_leerdam.json',function(err,data){
+        	d3.json('../data/flooddata_leerdam.json',function(err,data){
         		data.features.forEach(function(f){
         				f.id = counter++;
         		});
@@ -83,7 +83,7 @@
         addARKdata: function(){
         	var self= this;
         	var counter = 0;
-        	d3.json('./data/flooddata_ark.json',function(err,data){
+        	d3.json('../data/flooddata_ark.json',function(err,data){
         		data.features.forEach(function(f){
         				f.id = counter++;
         				f.style = {opacity: f.properties.uur/4};

@@ -8,6 +8,7 @@
 <link rel="import" href="../bower_components/paper-menu/paper-menu.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 
 <link rel="import" href="../bower_components/mappu-elements/mappu-map.html">
@@ -35,6 +36,7 @@
     <template>
     <paper-dialog id='adddialog' opened="{{opened}}">
          <h2>Nieuw incident</h2>
+         <paper-dialog-scrollable>
         <div id='inputs' class="layout horizontal">
             <paper-input id="name" class='input' label="Naam"></paper-input>
             <paper-dropdown-menu id='scenario' class='input' label="Scenario">
@@ -60,6 +62,7 @@
               <paper-button dialog-dismiss>Annuleer</paper-button>
               <paper-button dialog-accept on-click="add">Voeg toe</paper-button>
         </div>
+      </paper-dialog-scrollable>
       </paper-dialog>
     </template>
 </dom-module>
@@ -88,7 +91,6 @@
             var center = this.$.mapelement.map.center;
             var zoom = this.$.mapelement.map.zoom;
             var scenario = this.$.scenario.value;
-            //TODO: add scenario etc..
             this.fire('newincident',{msg: {
             	name: name, 
             	center: center, 

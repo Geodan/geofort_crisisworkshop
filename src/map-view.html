@@ -1,17 +1,11 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-drawer-panel/paper-drawer-panel.html">
 <link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tab.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bower_components/gm-elements/gm-geosearch.html">
 <link rel="import" href="../bower_components/mappu-elements/mappu-map.html">
@@ -31,29 +25,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
 
       }
-      #togglelayers {
-          background: grey;
-          position: absolute;
-          bottom: 10px;
-          right: 10px;
-      }
-      #togglechat {
-          background: grey;
-          position: absolute;
-          bottom: 60px;
-          right: 10px;
+      chat-view {
+      	  height: 100%;
       }
       #mapelement {
-
   		background: lightBlue;
       }
       #toast {
           z-index: 1000;
       }
-      	#eaglechat {
-            display: block;
-      		width: 300px;
-      	}
         #geosearch {
             display: block;
             width: 300px;
@@ -64,45 +44,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     		bottom: 100px;
     		left: 0px;
     	}
-        #layermngr {
-    		position: absolute;
-    		right: 0px;
-    		bottom: 100px;
-    		z-index: 10001;
-    	}
         #togglebuttons {
             padding: 5px;
         }
+        iron-pages {
+      	  height: 100%;
+      }
 
     </style>
     <paper-toast id="toast" text="{{toasttext}}"></paper-toast>
-    <paper-drawer-panel name='main' id='mainpanel' right-drawer>
+    <paper-drawer-panel id='rightdrawer' right-drawer peeking>
         <div drawer>
-            <chat-view id="eaglechat"
-                chatitems="[[chatitems]]"
-                store="[[itemstore]]"
-                activeuser="[[activeuser]]"
-                on-goto-location="gotolocation">
-            </chat-view>
+        	<paper-tabs selected="{{drawerpage}}">
+			  <paper-tab>Chat</paper-tab>
+			  <paper-tab>Lagen</paper-tab>
+			</paper-tabs>
+        	<iron-pages id="drawerpage" selected="[[drawerpage]]">
+				<chat-view id="eaglechat"
+					chatitems="[[chatitems]]"
+					store="[[itemstore]]"
+					activeuser="[[activeuser]]"
+					on-goto-location="gotolocation">
+				</chat-view>
+				<mappu-layermanager id="layermngr" map="[[map]]"></mappu-layermanager>
+			</iron-pages>
         </div>
         <div main>
 
             <mappu-map class='flex' id='mapelement' map="{{map}}">
                 <gm-geosearch id="geosearch" 
                 	last-boundary="{{lastBoundary}}"></gm-geosearch>
-                <iron-collapse id="layermngr" class='collapse-content' opened='[[layerstoggled]]'>
-                    LAyerManger
-                    <mappu-layermanager map="[[map]]"></mappu-layermanager>
-                </iron-collapse>
                 <mappu-zoombuttons id="zoombuttons" map="[[map]]"></mappu-zoombuttons>
                 <mappu-drawbuttons id="drawbuttons"
                     map="[[map]]"
                     styleset="[[styleset]]"
                 ></mappu-drawbuttons>
-                <div id='togglebuttons'>
-                    <paper-fab mini id='togglelayers' toggles icon="menu" active='{{layerstoggled}}'></paper-fab>
-                    <paper-fab mini id='togglechat' toggles icon="send" paper-drawer-toggle></paper-fab>
-                </div>
                 <mappu-stylesets styleset1="{{styleset}}"></mappu-stylesets>
                 <mappu-cowlayer
                     id="cowlayer"
@@ -142,6 +118,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           map: {
           	  type: Object,
           	  notify: true
+          },
+          drawerpage: {
+          	  type: Number,
+          	  value: 0
           }
       },
       ready: function(){

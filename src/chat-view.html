@@ -124,7 +124,7 @@ Polymer({
 		this.recentlyChanged = true;
 	},
 	_chatitemsChanged: function(){
-		this.$.list.scrollToIndex(this.chatitems.length);
+		this.$.list.scrollToIndex(this.chatitems.length-1);
 		this.$.list.fire('resize');
 	},
 	send: function(){
